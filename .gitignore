@@ -1,5 +1,15 @@
 venv
 *.pyc
 *.sqlite3
-*.whl
+
+# test artifacts
+src/.coveragae
+src/*.xml
+
+# eggs
+src/*egg-info
+
+# build and test artifacts
+target
+reports
 
