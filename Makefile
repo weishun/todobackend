@@ -32,6 +32,10 @@ CHECK := @bash -c '\
 # Use these settings to specify a custom Docker registry
 DOCKER_REGISTRY ?= docker.io
 
+# Warning: set DOCKER_REGISTRY_AUTH to empty for Docker Hub
+# set DOCKER_REGISTRY_AUTH to auth endpoint for private Docker registry
+DOCKER_REGISTRY_AUTH ?= 
+
 .PHONY: test build release tag buildtag login logout publish
 
 test:
@@ -96,11 +100,24 @@ buildtag:
 	@ $(foreach tag, $(BUILDTAG_ARGS), docker tag $(IMAGE_ID) $(DOCKER_REGISTRY)/$(ORG_NAME)/$(REPO_NAME):$(tag).$(BUILD_TAG);)
 	${INFO} "Tagging complete"
 
+login:
+	${INFO} "Logging in to Docker registry $$DOCKER_REGISTRY..."
+	@ docker login -u $$DOCKER_USER -p $$DOCKER_PASSWORD -e $$DOCKER_EMAIL $(DOCKER_REGISTRY_AUTH)
+	${INFO} "Logged in to Docker registry $$DOCKER_REGISTRY
+
+logout:
+	${INFO} "Logging out of Docker registry $$DOCKER_REGISTRY..."
+	@ docker logout
+	${INFO} "Logged out of Docker registry $$DOCKER_REGISTRY"
+
+publish:
+	${INFO} "Publishing release image ${IMAGE_ID} to $(DOCKER_REGISTRY)/$(ORG_NAME)/$(REPO_NAME)..."
+	@ $(foreach tag, $(shell echo $(REPO_EXPR)), docker push $(tag);)
+	${INFO} "Publish complete"
 
 # Cosmetics
 YELLOW := "\e[1;33m"
-NC := "\e[0m"
-
+NC := "\e[0
 # shell functions
 INFO := @bash -c '\
   printf $(YELLOW); \
@@ -112,6 +129,16 @@ APP_CONTAINER_ID := $$(docker-compose -p $(REL_PROJECT) -f $(REL_COMPOSE_FILE) p
  
 # Get image id of application service
 IMAGE_ID := $$(docker inspect -f '{{ .Image }}' $(APP_CONTAINER_ID))
+
+# Repository filter
+ifeq ($(DOCKER_REGISTRY), docker.io)
+  REPO_FILTER := $(ORG_NAME)/$(REPO_NAME)[^[:space:]|\$$]*
+else 
+  REPO_FILTER := $(DOCKER_REGISTRY)/$(ORG_NAME)/$(REPO_NAME)[^[:space:]|\$$]*
+endif
+
+# Introspect repository tags
+REPO_EXPR := $$(docker inspect -f '{{range .RepoTags}}{{.}} {{end}}' $(IMAGE_ID) | grep -oh "$(REPO_FILTER)" | xargs)
 
 # Extract tag arguments
 ifeq (tag,$(firstword $(MAKECMDGOALS)))
