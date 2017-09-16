@@ -34,7 +34,7 @@ DOCKER_REGISTRY ?= docker.io
 
 # Warning: set DOCKER_REGISTRY_AUTH to empty for Docker Hub
 # set DOCKER_REGISTRY_AUTH to auth endpoint for private Docker registry
-DOCKER_REGISTRY_AUTH ?= 
+DOCKER_REGISTRY_AUTH ?=
 
 .PHONY: test build release tag buildtag login logout publish
 
@@ -103,7 +103,7 @@ buildtag:
 login:
 	${INFO} "Logging in to Docker registry $$DOCKER_REGISTRY..."
 	@ docker login -u $$DOCKER_USER -p $$DOCKER_PASSWORD -e $$DOCKER_EMAIL $(DOCKER_REGISTRY_AUTH)
-	${INFO} "Logged in to Docker registry $$DOCKER_REGISTRY
+	${INFO} "Logged in to Docker registry $$DOCKER_REGISTRY"
 
 logout:
 	${INFO} "Logging out of Docker registry $$DOCKER_REGISTRY..."
