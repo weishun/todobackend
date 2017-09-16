@@ -111,18 +111,15 @@ logout:
 	${INFO} "Logged out of Docker registry $$DOCKER_REGISTRY"
 
 publish:
-	${INFO} "Publishing release image ${IMAGE_ID} to $(DOCKER_REGISTRY)/$(ORG_NAME)/$(REPO_NAME)..."
+	${INFO} "Publishing release image $(IMAGE_ID) to $(DOCKER_REGISTRY)/$(ORG_NAME)/$(REPO_NAME)..."
 	@ $(foreach tag, $(shell echo $(REPO_EXPR)), docker push $(tag);)
 	${INFO} "Publish complete"
 
 # Cosmetics
 YELLOW := "\e[1;33m"
-NC := "\e[0
+NC := "\e[0m"
 # shell functions
-INFO := @bash -c '\
-  printf $(YELLOW); \
-  echo "=> $$1"; \
-  printf $(NC)' VALUE
+INFO := @bash -c 'printf $(YELLOW); echo "=> $$1"; printf $(NC)' VALUE
 
 # Get container id of application service container
 APP_CONTAINER_ID := $$(docker-compose -p $(REL_PROJECT) -f $(REL_COMPOSE_FILE) ps -q $(APP_SERVICE_NAME))
